@@ -33,6 +33,11 @@ SOURCES = [
     ("Euronews", "欧洲新闻", "https://www.euronews.com/rss?level=theme&name=news"),
 ]
 
+# 不再收录的条目（2026-11-16 用户要求删除）：CNN 这条购物应用恶意软件报道
+# 会被源站每天重新推送，去重只认当日文件所以每天都会回到顶部
+BLOCKED_URLS = {"https://cnn.it/40OSomK"}
+BLOCKED_TITLE_SUBSTRS = ("Chinese shopping app malware",)
+
 # 亚洲关键词（标题+摘要命中其一即收录）
 ASIA_KW = [
     "china", "chinese", "beijing", "shanghai", "shenzhen", "guangzhou", "wuhan",
@@ -269,6 +274,11 @@ def main():
             print(f"  [fetch fail] {src_en}: {e}", flush=True)
         time.sleep(1)
 
+    # 拦截不再收录的条目（链接与标题双重判定）
+    all_new = [a for a in all_new
+               if a["url"] not in BLOCKED_URLS
+               and not any(s.lower() in a["title_en"].lower() for s in BLOCKED_TITLE_SUBSTRS)]
+
     # 去重
     fresh = [a for a in all_new if a["id"] not in existing]
     print(f"total new: {len(fresh)} (existing {len(existing)})", flush=True)
@@ -287,6 +297,9 @@ def main():
             existing[a["id"]] = a
 
     articles = sorted(existing.values(), key=lambda x: x["published"], reverse=True)
+    # 站内阅读不跳转外站：入库时去掉原文链接（去重用的 id 已在抓取时算好，不受影响）
+    for a in articles:
+        a.pop("url", None)
     json.dump(articles, open(day_file, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 
     # 更新日期索引（新日期在前）

@@ -171,17 +171,16 @@ async function loadDay(date) {
     }
     list.innerHTML = arts.map((a, i) => `
       <article class="card" id="card-${i}">
-        ${a.image ? `<div class="img" style="background-image:url('${esc(a.image)}')" onclick="window.open('${esc(a.url)}','_blank')"></div>` : ''}
+        ${a.image ? `<div class="img" style="background-image:url('${esc(a.image)}')"></div>` : ''}
         <div class="body">
           <div class="meta">
             <span class="src">${esc(a.source_zh)}</span>
             <span class="time">${esc(a.published.slice(0, 16).replace('T', ' '))}</span>
           </div>
-          <h3><a href="${esc(a.url)}" target="_blank" rel="noopener">${esc(a.title_zh) || esc(a.title_en)}</a></h3>
+          <h3>${esc(a.title_zh) || esc(a.title_en)}</h3>
           ${a.summary_zh ? `<p class="sum">${esc(a.summary_zh)}</p>` : ''}
           <p class="en"><b>原文标题：</b>${esc(a.title_en)}<br>${esc(a.summary_en)}</p>
           <div class="actions">
-            <a href="${esc(a.url)}" target="_blank" rel="noopener">阅读原文 →</a>
             <button onclick="document.getElementById('card-${i}').classList.toggle('show-en')">中/英对照</button>
           </div>
         </div>
